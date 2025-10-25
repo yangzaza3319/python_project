@@ -179,3 +179,8 @@ class Soldier:
 # 测试
 xiaowenhao = Soldier("xiaowenhao", ak47)
 xiaowenhao.fire()
+"""
+输出
+[xiaowenhao]冲锋！！！
+ak47 发射子弹[48]...突突突
+"""
