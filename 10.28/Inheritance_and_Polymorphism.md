@@ -90,3 +90,153 @@ xiaotianquan.eat()   # 输出 哮天犬吃东西....
 2. 定义Xiaotianquan继承自Dog，并且重写game方法
 3. 定义person类并且封装一个和狗玩的方法
 ![alt text](UML_xioatianquan.png)
+> 小结
+Human类只需要让狗对象调用dog_play()方法，而不关心具体是什么狗
+dog_play()方法是在Dog父类中定义的
+在程序执行时，传入不同的狗对象实参，就会产生不同的执行效果
+
+## 鸭子类型
+
+### 什么是鸭子类型
+> 在python中，不关心对象是什么类型，只关心它能做什么（不需要显示继承某个类、不需要实现某个接口、只要对象有被需要的的方法或属性）的类型
+
+### 代码示例
+
+#### 基本鸭子类型
+
+#### 文件操作中的鸭子类型
+StringIO不是File，但行为像文件，所以能用
+
+#### 迭代器协议
+只要实现__iter__和__next__就能被for使用，无需继承Iterator
+
+## 类的约束
+
+### 引入案例
+```python
+## 写一个简单的支付功能
+class QQpay:
+    def pay(self,money):
+        print('使用QQ支付%s元' % money)
+class Alipay:
+    def pay(self,money):
+        print('使用支付宝支付%s元' % money)
+a = Alipay()
+a.pay(100)
+
+b = QQpay()
+b.pay(200)
+
+## 统一一下付款方式
+class QQpay:
+    def pay(self,money):
+        print('使用QQ支付%s元' % money)
+class Alipay:
+    def pay(self,money):
+        print('使用支付宝支付%s元' % money)
+
+def pay(obj,money):
+    obj.pay(money)
+
+pay(Alipay(),100)
+pay(QQpay(),200)
+"""
+输出
+    使用支付宝支付100元
+    使用QQ支付200元
+"""
+
+## 再添加微信支付，但是没有统一标准，换个程序员可能产生混乱的代码
+class QQpay:
+    def pay(self,money):
+        print('使用QQ支付%s元' % money)
+class Alipay:
+    def pay(self,money):
+        print('使用支付宝支付%s元' % money)
+class Wechatpay:
+    def fukuan(self,money):
+        print('使用微信支付%s元' % money)
+def pay(obj,money):
+    print("************")
+    obj.pay(money)
+
+pay(Alipay(),100)
+pay(QQpay(),200)
+
+Wechatpay().fukuan(300)
+"""
+在这种情况下，就不符合鸭子类型，接口出现不统一的情况
+输出
+    使用支付宝支付100元
+    使用QQ支付200元
+    使用微信支付300元
+"""
+```
+### 两种类的约束
+1. 使用抽象基类(ABC)+`@abstractmethod`
+> 适用于需要强制继承关系的场景（如框架、库设计等）
+特点 
+    - 子类必须继承该基类
+    - 实例化时检查是否实现了所有抽象方法
+    - Python官方推荐的面向对象约束方式
+优点
+    - 提前报错（实例化时就检查，不是运行到方法才报错）
+    - 代码结构清晰,意图明确
+    - 支持抽象属性(@property+@abstractmethod)
+
+
+2. 使用`Protocol`(结构化鸭子类型)
+> 不需要强制继承，只关心'行为'的场景(Python 3.8+)
+特点
+    - 不要求继承，只要对象有对应方法/属性即可
+    - 依赖静态类型检查工具（如mypy）来验证约束
+    - 运行时不会报错（除非调用不存在的方法）
+优点
+    - 极度灵活，符合鸭子类型哲学
+    - 适合插件系统、接口回调等场景
+    - 与类型提示(Type Hints)完美结合
+
+## `super()`函数
+> 用于调用父类的方法，尤其在继承中非常关键。它能保证方法中调用遵循正确的方法解析顺序（MRO），避免重复调用或遗漏
+
+### 基本作用
+`super()`返回一个代理对象，可以访问父类中被重写的方法
+#### 常见用途示例（在子类中调用父类的`__init__`）
+```python
+class Animal:
+    def __init__(self,name):
+        self.name = name
+class Dog(Animal):
+    def __init__(self,name,bread):
+        super().__init__(name) # 调用分类 __init__
+        self.bread = bread
+d = Dog("旺财","金毛")
+print(d.name,d.bread) 
+"""
+输出
+    旺财 金毛
+"""
+```
+
+### `super()`的两种写法
+
+#### 无参数形式
+```python
+super().method()
+```
+- 自动传入当前类和self
+- 简洁、安全、支持多继承
+
+#### 带参数形式
+```python
+super(CurrentClass,self).method()
+```
+
+### 案例1: 单继承中调用父类初始化
+学生类继承人类，需要初始化姓名和学号
+
+### 案例2: 方法重写时扩展父类的行为
+狗叫时，先发出通用动物声音，再发出“汪汪”
+
+### 案例3: 多继承+super()协作
+一个角色既能飞行，又能游泳，还属于动物
