@@ -120,4 +120,3 @@ print(obj.__private_method())  # 调用私有方法
     AttributeError: 'MyClass' object has no attribute '__private_method'
 """
 
-# 综合案例

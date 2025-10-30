@@ -10,7 +10,7 @@
 ### 方法（函数）
 方法分为实例方法、类方法、和静态方法，区别在于参数和调用方式
     - 实例方法  第一个参数为self,指向调用该方法的实例（必须通过对象调用，可访问实例变量和类变量）
-    - 类方法    使用`@classmethod`装饰器，参数为cls(指向类本身)，操作类变量或实现工厂模式（创建实例
+    - 类方法    使用`@classmethod`装饰器，参数为cls(指向类本身)，操作类变量或实现工厂模式（创建实例)
     - 静态方法  使用`@staticmethod`装饰器，无默认参数，不依赖类或实例状态；执行与类相关的工具函数
 
 ### 属性（Property）
@@ -48,4 +48,59 @@ print(obj.__private_method())  # 调用私有方法
     AttributeError: 'MyClass' object has no attribute '__private_method'
 """
 ```
-### 综合案例
+## 综合案例
+### 需求
+- 设置一个`Game`类
+- 属性
+    - 定义一个类属性`top_score`记录当前游戏的最高分
+    - 定义一个实例属性`player_name`记录当前游戏的玩家姓名
+- 方法
+    - 静态方法`show_help`显示游戏帮助信息
+    - 类方法 `show_top_score` 显示历史最高分
+    - 实例方法 `start_game` 开始当前玩家的游戏
+- 主程序的步骤
+    1. 查看帮助信息
+    2. 查看历史最高分
+    3. 创建游戏对象，开始游戏
+
+![alt text](class_members.png)
+
+## `isinstance`和`issubclass`
+> isinstance(a,b)：判断a是否是b类（或者b类的派生类）实例化的对象
+```python
+class A:
+    pass
+
+class B(A):
+    pass
+
+obj = B()
+
+print(isinstance(obj,B))
+print(isinstance(obj,A))
+```
+
+> issubclass(a,b)： 判断a类是否是b类（或者b的派生类）的派生类
+```python
+class A:
+    pass
+
+class B(A):
+    pass
+
+class C(B):
+    pass
+
+print(issubclass(B,A))
+print(issubclass(C,A))
+```
+
+## 总结
+
+| 特性         | 普通方法               | 类方法                 | 静态方法               |
+|--------------|------------------------|------------------------|------------------------|
+| 定义方式     | 不需要装饰器           | `@classmethod`         | `@staticmethod`        |
+| 第一个参数   | `self`                 | `cls`                  | 无                     |
+| 访问权限     | 访问实例属性和方法     | 访问类属性和方法       | 无法访问类和实例属性   |
+| 调用方式     | 通过实例调用           | 通过类或实例调用       | 通过类或实例调用       |
+| 适用场景     | 实例相关操作           | 与类相关的操作         | 与类无关的操作         |
