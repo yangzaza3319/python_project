@@ -102,3 +102,63 @@ python3 demo1_client.py
 输出 
 服务端调用了两次 send()（分别发送 'hello' 和 'world'），但客户端只调用了一次 recv(1024)，结果却收到了合并后的 'helloworld'
 """
+#### 现象解释
+1. Nagle算法：发送端连续调用`send()`发送小数据包，可能将两次发送合并为同一个包
+2. 缓冲区机制：接收端`recv(1024)`的缓冲区较大，一次性读取了所有待接收的数据
+
+### 粘包案例2
+
+#### 服务端代码
+```python
+import socket
+
+server = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+server.bind(('0.0.0.0',8888))
+server.listen(5)
+
+print("服务端已启动，等待客户端连接")
+conn,addr = server.accept()
+
+try:
+    # 发送10kb数据(超过常规数据接收区大小)
+    big_data = b'a' * 1024 * 10 
+    conn.sendall(big_data)
+    print(f"已发送{len(big_data)}字节数据")
+except KeyboardInterrupt:
+    print("服务端主动终止")
+finally:
+    conn.close()
+    server.close()
+
+```
+
+#### 客户端代码
+```python
+import socket
+
+client = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+client.connect(('127.0.0.1',8888))
+
+try:
+    partial_data = client.recv(4096)                 # 设置接收缓冲区为4kb，且仅接收一次
+    print(f"实际接收长度:{len(partial_data)}字节")      
+except ConnectionResetError:
+    print("服务端已关闭连接")
+finally:
+    client.close()
+
+```
+
+#### 运行验证
+```bash
+python3 demo2_server.py
+    服务端控制台输出  服务端已启动，等待客户端连接
+python3 demo2_client.py 
+    服务端控制台输出  已发送10240字节（发送10kb）
+    客户端控制台输出  实际接收长度4096字节（实际接收4kb）
+```
+#### 现象解释
+1. TCP流式特性
+   TCP将数据视为连续字节流，无边界标识
+2. 缓冲区限制
+   `recv()`方法一次性读取的字节数受参数限制，未循环接收导致残留
