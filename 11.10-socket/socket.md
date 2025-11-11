@@ -52,4 +52,53 @@
 >       - 接收不完整：接收端`recv()`方法未动态调整缓冲区大小，导致部分数据残留
 
 ### 案例1——通过 连续发送小数据包 和 接收缓冲区合并 的场景（即接收方一次性读取到“粘在一起”的数据）模拟粘包现象
+```python
+# demo1_server.py
+import socket
 
+server = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+server.bind(('0.0.0.0',8888))
+server.listen(5)
+print("服务端已启动，等待客户端连接...")
+
+conn,addr = server.accept()
+print(f"客户端{addr}已经连接")
+
+try:
+    # 连续发送两次数据(没有处理粘包)
+    conn.send(b'hello') # 第一次发送
+    conn.send(b'world') # 第二次发送（可能合并到缓冲区）
+except KeyboardInterrupt:
+    print("服务端主动终止")
+finally:
+    conn.close()
+    server.close()
+```
+
+```python
+# demo1_client.py
+import socket
+
+client = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+client.connect(('127.0.0.1',8888))
+
+try:
+    data = client.recv(1024)
+    print(f"接收到的数据：{data.decode()}")
+except ConnectionAbortedError:
+    print("服务端断开连接")
+finally:
+    client.close()
+```
+
+```bash
+python3 demo1_server.py
+    # 服务器控制台输出——服务端已启动，等待客户端连接...
+python3 demo1_client.py
+    # 服务端控制台输出——客户端('127.0.0.1', 59587)已经连接
+    # 客户端控制台输出——接收到的数据：helloworld
+```
+"""
+输出 
+服务端调用了两次 send()（分别发送 'hello' 和 'world'），但客户端只调用了一次 recv(1024)，结果却收到了合并后的 'helloworld'
+"""
