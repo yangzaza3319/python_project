@@ -1,3 +1,7 @@
+"""
+代码示例
+communication_demo1.py
+"""
 from multiprocessing import Queue
 
 q = Queue(3)

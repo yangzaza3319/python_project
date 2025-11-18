@@ -53,5 +53,96 @@ q.join_thread()| 连接队列的后台进程，此方法用于在调用q.close()
 
 #### 代码案例
 ```python
+"""
+代码示例
+communication_demo1.py
+"""
+from multiprocessing import Queue
+
+q = Queue(3)
+
+q.put('1')
+q.put('2')
+q.put('3')
+
+try:
+    q.put_nowait('4')
+except:
+    print("队列已经满了")
+
+print(q.get())
+print(q.get())
+print(q.get())
+
+# print(q.get()) # 此时队列已空，在运行这段代码，会发生阻塞——>解决方法 等待队列中put新数据
+
+
+try:
+    q.get_nowait()
+except:
+    print("队列已经空了")
+
+print(q.empty())
+
+"""
+输出
+    队列已经满了
+    1
+    2
+    3
+    队列已经空了
+True
+"""
+```
+#### 案例分析1
+> 定义两个进程，一个用于生产数据，一个用于消费数据，使用队列进行数据交换
+
+```python
+"""
+案例1
+# communication_demo2.py
+"""
+from  multiprocessing import  Process,Queue
+
+import time
+
+def func_put(q):
+    for i in range(3):
+        q.put(f"数据{i+1}")
+
+def func_get(q):
+    time.sleep(1)
+    while True:
+        try:
+            print(f"GET到数据：{q.get_nowait()}")
+        except Exception:
+            print("数据已经被全部拿完了")
+            break
+
+
+if __name__ == "__main__":
+    q = Queue()
+    p_put =Process(target=func_put,args=(q,))
+    p_get =Process(target=func_get,args=(q,))
+    p_put.start()
+    p_put.join()
+
+    p_get.start()
+    p_get.join()
+
+"""
+输出
+    GET到数据：数据1
+    GET到数据：数据2
+    GET到数据：数据3
+    数据已经被全部拿完了
+"""
+```
+
+
+#### 案例分析2
+> 多个进程通过计算并通过队列返回结果
+
+```python
 
 ```
