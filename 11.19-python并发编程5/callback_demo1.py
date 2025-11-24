@@ -11,6 +11,11 @@ if __name__=="__main__":
         results = []
         for i in range(10):
             pool.apply_async(square,(i,),callback=lambda r:collect_result(r,results))
-            pool.close()
-            pool.join()
-            print("最后结果:",sorted(results))
+        pool.close()
+        pool.join()
+        print("最后结果:",sorted(results))
+
+"""
+输出
+    最后结果: [0, 1, 4, 9, 16, 25, 36, 49, 64, 81]
+"""

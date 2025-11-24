@@ -121,8 +121,18 @@ if __name__=="__main__":
     with Pool(4) as pool:
         results = []
         for i in range(10):
-            pool.apply_async(square,(i,),callback=lamba r:collect_result(r,results))
-            pool.close()
-            pool.join()
-            print("最后结果:",sorted(results))
+            pool.apply_async(square,(i,),callback=lambda r:collect_result(r,results))
+        pool.close()
+        pool.join()
+        print("最后结果:",sorted(results))
+
+"""
+输出
+    最后结果: [0, 1, 4, 9, 16, 25, 36, 49, 64, 81]
+"""
+```
+
+### 案例：实时爬取网页内容并存储至本地文件
+```python
+
 ```
